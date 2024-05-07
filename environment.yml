@@ -4,3 +4,5 @@ channels:
 dependencies:
   - pip:
     - llama-index
+    - llama-index-llms-ollama
+    - llama-index-embeddings-ollama
