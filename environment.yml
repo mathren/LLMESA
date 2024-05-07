@@ -1,0 +1,6 @@
+name: LLMESA
+channels:
+  - defaults
+dependencies:
+  - pip:
+    - llama-index
