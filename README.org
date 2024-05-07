@@ -21,8 +21,9 @@ least 32GB of RAM memory to run locally.
 2. Run =conda env create -f environment.yml= to setup the required python environment
 3. Install [[https://github.com/ollama/ollama][ollama]] following the README there. In short, run =curl -fsSL https://ollama.com/install.sh | sh=
    Note that this will require =sudo= privileges.
-4. Install =llama3= as the LLM we will use locally with =ollama pull llama3=.
-5. Install nomic embedding =ollama pull nomic-embed-text=.
+4. Install =mistral= with =ollama pull mistral= (tried also =llama3= with
+   little success)
+5. (Optional) Install nomic embedding =ollama pull nomic-embed-text=.
 
 ** Usage
 

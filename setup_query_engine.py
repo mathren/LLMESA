@@ -47,9 +47,9 @@ if __name__ == "__main__":
         exit()
 
     # setup nomic embedding model
-    Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text")
+    Settings.embed_model = OllamaEmbedding(model_name="mistral")
     # ollama
-    Settings.llm = Ollama(model="llama3", request_timeout=360.0)
+    Settings.llm = Ollama(model="mistral", request_timeout=360.0)
 
     # store index so we don't have to recreate it every time
     PERSIST_DIR = "./storage"
