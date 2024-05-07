@@ -31,12 +31,12 @@ if not os.path.exists(PERSIST_DIR):
         recursive=True,
         required_exts=[".f90", ".f", ".defaults", ".list", ".inc", ".dek"],
     ).load_data(show_progress=True)
-    index = VectorStoreIndex.from_documents(documents)
+    index = VectorStoreIndex.from_documents(documents, show_progress=True)
     index.storage_context.persist(persist_dir=PERSIST_DIR)
     print("creating persistent storage!")
 else:
-    storage_context = StorageContext.from_defaults(persist_dir=PERSIST_DIR)
-    index = load_index_from_storage(storage_context)
+    storage_context = StorageContext.from_defaults(persist_dir=PERSIST_DIR, show_progress=True)
+    index = load_index_from_storage(storage_context, show_progress=True)
     print("index read from persistent storage!")
 
 # setup query_engine
