@@ -1,3 +1,6 @@
+# do not push the stored index
+storage/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
