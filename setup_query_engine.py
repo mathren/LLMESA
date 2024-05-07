@@ -1,16 +1,17 @@
 import os
-from llama_index.core import (VectorStoreIndex,
-                              SimpleDirectoryReader,
-                              Settings,
-                              StorageContext,
-                              load_index_from_storage,
-                              PromptTemplate
-                              )
+from llama_index.core import (
+    VectorStoreIndex,
+    SimpleDirectoryReader,
+    Settings,
+    StorageContext,
+    load_index_from_storage,
+    PromptTemplate,
+)
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
 
-def query_LLMESA(query_engine, query: str, template = '') -> 'str':
+def query_LLMESA(query_engine, query: str, template='') -> 'str':
     if not template:
         template = PromptTemplate(
             """We have provided context information below. \n
@@ -26,11 +27,13 @@ def query_LLMESA(query_engine, query: str, template = '') -> 'str':
             you are acting as a helper to understand and setup this code. \n
             \n---------------------\n
             Given this information, please answer the question: {query_str}\n
-            """)
+            """
+        )
     else:
         template = PromptTemplate(template)
     response = query_engine.query(template.format(query_str=query))
     return response
+
 
 if __name__ == "__main__":
     # read MESA_DIR from environment
@@ -56,7 +59,7 @@ if __name__ == "__main__":
             MESA_DIR,
             filename_as_id=True,
             recursive=True,
-            # required_exts=[".f90", ".f", ".defaults", ".list", ".inc", ".dek"],
+            required_exts=[".f90", ".f", ".defaults", ".list", ".inc", ".dek"],
         ).load_data(show_progress=True)
         index = VectorStoreIndex.from_documents(documents, show_progress=True)
         index.storage_context.persist(persist_dir=PERSIST_DIR)

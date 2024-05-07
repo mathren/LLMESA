@@ -44,7 +44,3 @@ Based on the provided context information, there is no mention of a variable or 
 #+end_src
 
 *N.B.:* Obviously this is not true, =dq= is defined in =$MESA_DIR/star/defaults/profile_columns.list=. Looking into improving this.
-
-** TODO
-
-- [ ] play with prompt engineering following [[https://docs.llamaindex.ai/en/stable/module_guides/models/prompts/][this]]
