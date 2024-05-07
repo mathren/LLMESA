@@ -31,10 +31,10 @@ delivering exists)
 
 1. If not done already, activate the environment with =conda activate LLM=
 2. Start a notebook by running =ipython=. Within the notebook run the
-   script [[./test.py][test.py]] with =%run ./test.py=. This will initialize things,
+   script [[./setup_query_engine.py][setup_query_engine.py]] with =%run ./setup_query_engine.py=. This will initialize things,
    most importantly the =query_engine= and show a template on how to use it.
 3. From within the notebook, create questions and print them (as per
-   the template shown by =test.py=), e.g.:
+   the template shown by =setup_query_engine.py=), e.g.:
 
 #+begin_src python
 In [2]: response = query_engine.query("What is dq?")
@@ -44,3 +44,7 @@ Based on the provided context information, there is no mention of a variable or 
 #+end_src
 
 *N.B.:* Obviously this is not true, =dq= is defined in =$MESA_DIR/star/defaults/profile_columns.list=. Looking into improving this.
+
+** TODO
+
+- [ ] play with prompt engineering following [[https://docs.llamaindex.ai/en/stable/module_guides/models/prompts/][this]]
