@@ -1,0 +1,19 @@
+#+title: Use LLM to parse MESA options
+
+[[https://docs.mesastar.org/en/latest/][MESA]] is an open-source and community-driven stellar evolution code,
+which has thousands of options that can be combined into an extremely
+large number of setups for different purposes.
+
+While most combinations are probably non-physical nonsense, it can be
+hard to navigate all the existing options, and it is an art to find
+what works for your science case.
+
+Large language models (LLM) are very good at parsing code and text
+(e.g., the documentation of the code).
+
+This is an attempt to use [[https://docs.llamaindex.ai/en/stable/][llama-index]] to create an helper to navigate
+MESA options.
+
+** Steps necessary
+
+You should also [[https://docs.mesastar.org/en/latest/installation.html][install MESA]] and export its location as =MESA_DIR=.
