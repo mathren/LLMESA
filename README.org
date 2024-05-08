@@ -9,8 +9,8 @@ case. Large language models (LLM) are very good at parsing code and
 text (e.g., the documentation of the code!).
 
 This is an attempt to use [[https://docs.llamaindex.ai/en/stable/][llama-index]] to create an helper to navigate
-MESA options. Testing with =MESA r24.03.1= and =llama3=, which requires at
-least 32GB of RAM memory to run locally.
+MESA options. Testing with =MESA r24.03.1= and =mistral=, which
+requires at least 32GB of RAM memory to run locally.
 
 
 ** Installation
@@ -30,7 +30,7 @@ least 32GB of RAM memory to run locally.
 (This ideally will be streamlined into a chatbot once a LLM capable of
 delivering exists)
 
-1. If not done already, activate the environment with =conda activate LLM=
+1. If not done already, activate the environment with =conda activate LLMESA=
 2. Start a notebook by running =ipython=. Within the notebook run the
    script [[./setup_query_engine.py][setup_query_engine.py]] with =%run ./setup_query_engine.py=. This will initialize things,
    most importantly the =query_engine= and show a template on how to use it.
@@ -45,3 +45,7 @@ Based on the provided context information, there is no mention of a variable or 
 #+end_src
 
 *N.B.:* Obviously this is not true, =dq= is defined in =$MESA_DIR/star/defaults/profile_columns.list=. Looking into improving this.
+
+** TODO
+
+- [ ] play with embedding and chunk size

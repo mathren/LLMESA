@@ -3,6 +3,7 @@ from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
     Settings,
+    ServiceContext,
     StorageContext,
     load_index_from_storage,
     PromptTemplate,
@@ -61,6 +62,7 @@ if __name__ == "__main__":
             recursive=True,
             required_exts=[".f90", ".f", ".defaults", ".list", ".inc", ".dek"],
         ).load_data(show_progress=True)
+        print(f"Loaded {len(documents)} files")
         index = VectorStoreIndex.from_documents(documents, show_progress=True)
         index.storage_context.persist(persist_dir=PERSIST_DIR)
         print("creating persistent storage!")

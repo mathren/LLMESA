@@ -2,8 +2,10 @@ name: LLMESA
 channels:
   - defaults
 dependencies:
+  - pip=24.0
   - pip:
     - llama-index
     - llama-index-llms-ollama
     - llama-index-embeddings-ollama
+    - llama-index-embeddings-huggingface
     - ipython
