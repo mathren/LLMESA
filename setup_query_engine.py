@@ -8,6 +8,7 @@ from llama_index.core import (
     load_index_from_storage,
     PromptTemplate,
 )
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
@@ -48,9 +49,9 @@ if __name__ == "__main__":
         exit()
 
     # setup nomic embedding model
-    Settings.embed_model = OllamaEmbedding(model_name="mistral")
+    Settings.embed_model = OllamaEmbedding(model_name="llama3:70b")
     # ollama
-    Settings.llm = Ollama(model="mistral", request_timeout=360.0)
+    Settings.llm = Ollama(model="llama3:70b", request_timeout=360.0)
 
     # store index so we don't have to recreate it every time
     PERSIST_DIR = "./storage"
@@ -61,8 +62,7 @@ if __name__ == "__main__":
             filename_as_id=True,
             recursive=True,
             required_exts=[".f90", ".f", ".defaults", ".list", ".inc", ".dek"],
-        ).load_data(show_progress=True)
-        print(f"Loaded {len(documents)} files")
+        ).load_data(show_progress=True, num_workers=20)
         index = VectorStoreIndex.from_documents(documents, show_progress=True)
         index.storage_context.persist(persist_dir=PERSIST_DIR)
         print("creating persistent storage!")
