@@ -3,12 +3,10 @@ from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
     Settings,
-    ServiceContext,
     StorageContext,
     load_index_from_storage,
     PromptTemplate,
 )
-from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
@@ -59,7 +57,7 @@ if __name__ == "__main__":
     # chuking
     Settings.chunk_size = 120
     Settings.chunk_overlap = 40
-    Settings.context_window = 1000
+    # Settings.context_window = 1000
 
     # store index so we don't have to recreate it every time
     PERSIST_DIR = "./storage"
@@ -69,8 +67,9 @@ if __name__ == "__main__":
             MESA_DIR,
             filename_as_id=True,
             recursive=True,
-            # required_exts=[".f90", ".f", ".defaults", ".list",  ".rst", ".inc", ".dek"],
-            required_exts=[".defaults", ".rst",]
+            required_exts=[".defaults", ".list",  ".rst",
+                           ".f90", ".f", ".inc", ".dek"],
+            # required_exts=[".defaults", ".rst"]
         ).load_data(show_progress=True, num_workers=20)
         index = VectorStoreIndex.from_documents(documents, show_progress=True)
         index.storage_context.persist(persist_dir=PERSIST_DIR)
@@ -84,9 +83,13 @@ if __name__ == "__main__":
     query_engine = index.as_query_engine()
 
     # test
-    # response = query_LLMESA(query_engine, "what is MESA?")
-    # print(response)
+    response = query_LLMESA(query_engine, "what is MESA?")
+    print("what is MESA?")
+    print(response)
+    response = query_LLMESA(query_engine, "what is `time_delta_coeff`?")
+    print("what is `time_delta_coeff`?")
+    print(response)
 
     print("Example usage:")
-    print("   response = query_LLMESA(query_engine, 'your question in natural language goes here')")
+    print("   response = query_LLMESA(query_engine, 'your question goes here')")
     print("   print(response)")
