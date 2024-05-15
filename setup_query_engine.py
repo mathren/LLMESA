@@ -27,8 +27,12 @@ def query_LLMESA(query_engine, query: str, template='') -> 'str':
             and it can be extended with customized functions in `run_star_extras.f90` and/or \n
             `run_binary_extras.f90`. You have been given all the code and input files, and \n
             you are acting as a helper to understand and setup this code. \n
+            Specifically, the options that can be use in `inlist` files have extensions `.default`, \n
+            the Fortran 90 code is in files with extensions `.f` or `.f90`, \n
+            and the examples on how to use the code are in `$MESA_DIR/star/test_suite/*` with the \n
+            customized code in the subfolders `src`.
             \n---------------------\n
-            Given this information, please answer the question: {query_str}\n
+            Given this information, please answer the following question: {query_str}\n
             """
         )
     else:
@@ -52,16 +56,20 @@ if __name__ == "__main__":
     Settings.embed_model = OllamaEmbedding(model_name="llama3:70b")
     # ollama
     Settings.llm = Ollama(model="llama3:70b", request_timeout=360.0)
+    # chuking
+    Settings.chunk_size = 512
+    Settings.chunk_overlap = 50
 
     # store index so we don't have to recreate it every time
-    PERSIST_DIR = "./storage"
+    PERSIST_DIR = "./storage_test"
 
     if not os.path.exists(PERSIST_DIR):
         documents = SimpleDirectoryReader(
             MESA_DIR,
             filename_as_id=True,
             recursive=True,
-            required_exts=[".f90", ".f", ".defaults", ".list", ".inc", ".dek"],
+            # required_exts=[".f90", ".f", ".defaults", ".list", ".inc", ".dek"],
+            required_exts=[".defaults"]
         ).load_data(show_progress=True, num_workers=20)
         index = VectorStoreIndex.from_documents(documents, show_progress=True)
         index.storage_context.persist(persist_dir=PERSIST_DIR)
