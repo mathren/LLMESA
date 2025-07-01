@@ -48,11 +48,9 @@ if __name__ == "__main__":
         print("export MESA_DIR=/path/to/your/MESA/installation/ ?")
         exit()
 
-    # setup nomic embedding model
-    Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text")  # llama3:70b
-    # ollama
-    Settings.llm = Ollama(model="starcoder2", request_timeout=600.0) # llama3:70b
-    # chuking
+
+    Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text")
+    Settings.llm = Ollama(model="starcoder2", request_timeout=600.0)
     Settings.chunk_size = 1200
     Settings.chunk_overlap = 200
     Settings.temperature = 0.0
