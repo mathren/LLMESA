@@ -9,7 +9,7 @@ from llama_index.core import (
 )
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
-
+import time
 
 def query_LLMESA(query_engine, query: str, template='') -> 'str':
     if not template:
@@ -24,8 +24,11 @@ def query_LLMESA(query_engine, query: str, template='') -> 'str':
         custom functions.
 
         Instructions:
-        - Keep answers short and to the point, do not anticipate further questions or provide information not strictly and directly relevant
-        - Use ONLY the provided context information to answer questions, do not rely on anything not in the context information
+        - Keep answers short and to the point
+        - do not anticipate further questions
+        - do not provide information not strictly and directly relevant to the question
+        - Use ONLY the provided context information to answer questions
+        - Ignore anything not in the context information
         - If there are multiple possible answers, provide all of them clearly distinguishing them
         - If information is not in the context, clearly state that and refuse to answer
         - For configuration parameters, include the file type and location at the end of the answer
@@ -34,8 +37,10 @@ def query_LLMESA(query_engine, query: str, template='') -> 'str':
                                   )
     else:
         template = PromptTemplate(template)
+    t_start = time.time()
     response = query_engine.query(template.format(query_str=query))
-    return response
+    response_time = time.time()-t_start
+    return response, response_time
 
 
 if __name__ == "__main__":
@@ -51,11 +56,11 @@ if __name__ == "__main__":
 
 
     Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text")
-    Settings.llm = Ollama(model="starcoder2", request_timeout=120.0)
+    Settings.llm = Ollama(model="starcoder2", request_timeout=600.0)
     Settings.chunk_size = 1200
     Settings.chunk_overlap = 200
     Settings.temperature = 0.0
-    Settings.top_p = 0.9
+    Settings.top_p = 0.01
 
     # store index so we don't have to recreate it every time
     PERSIST_DIR = "./storage-nomic-embed-text"
@@ -84,26 +89,27 @@ if __name__ == "__main__":
 
     # test
     query = "what is MESA?"
-    response = query_LLMESA(query_engine, query=query)
-    print(query)
-    print(response)
+    response, response_time = query_LLMESA(query_engine, query=query)
+    print(query, response_time)
+    print(f"{response}")
     query = "what is `time_delta_coeff`?"
-    response = query_LLMESA(query_engine, query=query)
-    print(query)
-    print(response)
+    response, response_time = query_LLMESA(query_engine, query=query)
+    print(query, response_time)
+    print(f"{response}")
 
     print("Example usage:")
     print("   response = query_LLMESA(query_engine, 'your question goes here')")
     print("   print(response)")
 
     # # Interactive mode
-    print("\nEntering interactive mode (type 'quit' to exit):")
+    print()
+    print("Entering interactive mode (type 'quit' to exit):")
     while True:
-        user_query = input("What's your question about MESA? ").strip()
+        user_query = input("What's your question about MESA?\n").strip()
         if user_query.lower() in ['quit', 'exit', 'q']:
             break
         if user_query:
-            response = query_LLMESA(query_engine, user_query)
-            print(f"\nResponse: {response}")
+            response, time = query_LLMESA(query_engine, user_query)
+            print(f"{response}")
     print("done")
     exit()
