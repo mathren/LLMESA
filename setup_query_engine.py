@@ -18,15 +18,54 @@ import time
 from typing import List
 from pathlib import Path
 
+
+def chunk_fortran_content(text: str, chunk_lines=50, overlap_lines=5, max_chars=2000):
+    """Custom Fortran-aware chunking function"""
+    lines = text.split('\n')
+    chunks = []
+    i = 0
+
+    while i < len(lines):
+        chunk_lines_list = []
+        char_count = 0
+        line_count = 0
+
+        # Add lines to chunk
+        while (i < len(lines) and
+               line_count < chunk_lines and
+               char_count < max_chars):
+
+            line = lines[i]
+
+            # Try to break at logical Fortran boundaries
+            if line_count > 0 and char_count > max_chars * 0.7:  # 70% of max
+                # Look for good break points
+                line_stripped = line.strip().lower()  # remove whitespace
+                if (line_stripped.startswith(('end ', 'end\t', 'enddo', 'endif', 'endsubroutine', 'endfunction', 'endmodule')) or
+                    line_stripped == 'end' or
+                    line_stripped.startswith('!') or  # Comment line
+                    line.strip() == ''):  # Empty line
+                    chunk_lines_list.append(line)
+                    i += 1
+                    break
+
+            chunk_lines_list.append(line)
+            char_count += len(line) + 1  # +1 for newline
+            line_count += 1
+            i += 1
+
+        if chunk_lines_list:
+            chunks.append('\n'.join(chunk_lines_list))
+
+        # Move back for overlap, but avoid infinite loops
+        if overlap_lines > 0 and i < len(lines):
+            i = max(i - overlap_lines, i - line_count + 1)
+
+    return chunks
+
+
 def create_parsers():
     """Create and return all the different parsers"""
-    fortran_parser = CodeSplitter(
-        language="fortran",
-        chunk_lines=50,  # Lines per chunk
-        chunk_lines_overlap=5,  # Overlap between chunks
-        max_chars=2000,
-    )
-
     rst_parser = MarkdownNodeParser()  # RST is similar to Markdown
 
     # Custom parser for .defaults files
@@ -44,35 +83,66 @@ def create_parsers():
     )
 
     # Default parser for other files
-    default_parser = SentenceSplitter(
+    standard_parser = SentenceSplitter(
         chunk_size=1200,
         chunk_overlap=200,
     )
 
     return {
-        'fortran': fortran_parser,
         'rst': rst_parser,
         'defaults': defaults_parser,
         'list': list_parser,
-        'default': default_parser
+        'standard': standard_parser
     }
 
 
-def get_parser_for_extension(file_ext, parsers):
-    """Return the appropriate parser for a given file extension"""
+def process_single_document(doc, parsers):
+    """Process a single document with appropriate chunking strategy"""
+    file_path = doc.metadata.get('file_path', '') or doc.doc_id or ''
+    file_ext = Path(file_path).suffix.lower()
+
+    print(f"Processing {file_path} with extension {file_ext}")
+
     if file_ext in ['.f', '.f90', '.inc', '.dek']:
-        return parsers['fortran'], 'Fortran-aware'
+        # Custom Fortran chunking
+        chunks = chunk_fortran_content(doc.text)
+        nodes = []
+        for i, chunk in enumerate(chunks):
+            # Create nodes manually
+            from llama_index.core.schema import TextNode
+            node = TextNode(
+                text=chunk,
+                metadata={**doc.metadata, 'chunk_id': i},
+                id_=f"{doc.doc_id}_chunk_{i}"
+            )
+            nodes.append(node)
+        print(f"  Fortran-aware chunking: {len(nodes)} chunks")
+        return nodes
+
     elif file_ext == '.list':
-        return parsers['list'], 'Line-by-line'
+        nodes = parsers['list'].get_nodes_from_documents([doc])
+        print(f"  Line-by-line chunking: {len(nodes)} chunks")
+        return nodes
+
     elif file_ext == '.defaults':
-        return parsers['defaults'], 'Defaults-aware'
+        nodes = parsers['defaults'].get_nodes_from_documents([doc])
+        print(f"  Defaults-aware chunking: {len(nodes)} chunks")
+        return nodes
+
     elif file_ext == '.rst':
-        return parsers['rst'], 'RST-aware'
+        nodes = parsers['rst'].get_nodes_from_documents([doc])
+        print(f"  RST-aware chunking: {len(nodes)} chunks")
+        return nodes
+
     else:
-        return parsers['default'], 'Default'
+        # Fallback to default chunking
+        nodes = parsers['standard'].get_nodes_from_documents([doc])
+        print(f"  Standard chunking: {len(nodes)} chunks")
+        return nodes
 
 
-def process_documents_with_custom_chunking(documents: List[Document]) -> List:
+
+def process_documents_with_custom_chunking(documents: List) -> List:
     """Process documents with type-specific chunking strategies"""
     parsers = create_parsers()
     processed_nodes = []
@@ -118,6 +188,43 @@ def create_index_with_custom_chunking(mesa_dir: str, persist_dir: str,
     index = VectorStoreIndex(nodes, show_progress=True)
     index.storage_context.persist(persist_dir=persist_dir)
 
+    return index
+
+
+def process_documents_with_custom_chunking(documents: List) -> List:
+    """Process documents with type-specific chunking strategies"""
+    parsers = create_parsers()
+    processed_nodes = []
+
+    for doc in documents:
+        nodes = process_single_document(doc, parsers)
+        processed_nodes.extend(nodes)
+
+    return processed_nodes
+
+
+def create_index_with_custom_chunking(mesa_dir: str, persist_dir: str):
+    """Create index with custom chunking for different file types"""
+    print("Creating index with custom chunking strategies...")
+
+    # Load documents
+    documents = SimpleDirectoryReader(
+        mesa_dir,
+        filename_as_id=True,
+        recursive=True,
+        required_exts=[
+            ".defaults", ".list", ".rst",
+            ".f90", ".f", ".inc", ".dek"
+        ],
+    ).load_data(show_progress=True, num_workers=10)
+
+    # Process with custom chunking
+    nodes = process_documents_with_custom_chunking(documents)
+
+    # Create index from processed nodes
+    print(f"Creating index from {len(nodes)} total nodes...")
+    index = VectorStoreIndex(nodes, show_progress=True)
+    index.storage_context.persist(persist_dir=persist_dir)
     return index
 
 
