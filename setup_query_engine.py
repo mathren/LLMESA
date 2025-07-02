@@ -39,7 +39,8 @@ def query_LLMESA(query_engine, query: str, template='') -> 'str':
         template = PromptTemplate(template)
     t_start = time.time()
     response = query_engine.query(template.format(query_str=query))
-    response_time = time.time()-t_start
+    t_end = time.time()
+    response_time = t_end-t_start
     return response, response_time
 
 
@@ -58,12 +59,13 @@ if __name__ == "__main__":
     Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text")
     Settings.llm = Ollama(model="starcoder2", request_timeout=600.0)
     Settings.chunk_size = 1200
-    Settings.chunk_overlap = 200
+    Settings.chunk_overlap = 300
     Settings.temperature = 0.0
     Settings.top_p = 0.01
+    Settings.context_window = 4096
 
     # store index so we don't have to recreate it every time
-    PERSIST_DIR = "./storage-nomic-embed-text"
+    PERSIST_DIR = "./storage-nomic-embed-text2"
 
     if not os.path.exists(PERSIST_DIR):
         print("creating persistent storage!")
@@ -75,8 +77,7 @@ if __name__ == "__main__":
                 ".defaults", ".list",  ".rst",
                 ".f90", ".f", ".inc", ".dek"
             ],
-            #required_exts=[".defaults",  ".list", ".rst"],
-        ).load_data(show_progress=True, num_workers=20)
+        ).load_data(show_progress=True, num_workers=10)
         index = VectorStoreIndex.from_documents(documents, show_progress=True)
         index.storage_context.persist(persist_dir=PERSIST_DIR)
     else:
